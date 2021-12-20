@@ -22,7 +22,6 @@ export class UserEntity implements User {
 
   @BeforeInsert()
   async hashPassword() {
-    //TODO: Comprobar porque no funciona
     await crypt(this.password).then((password) => (this.password = password));
   }
 

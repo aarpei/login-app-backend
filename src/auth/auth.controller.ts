@@ -11,12 +11,10 @@ export class AuthController {
   async login(
     @Body() userLogin: UserLoginDto,
   ): Promise<{ accessToken: string }> {
-    console.log('userLogin', userLogin);
     const valid: boolean = await this.authService.validateUser(
       userLogin.email,
       userLogin.password,
     );
-    console.log('valid', valid);
     if (!valid) {
       throw new Error();
     }

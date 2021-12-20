@@ -14,6 +14,3 @@ export const crypt = async (value: string): Promise<string> => {
 const hash = async (value) => {
   return await bcrypt.hash(value, 10);
 };
-/* const genSalt = async () => {
-  await bcrypt.genSalt().then((data) => console.log('SALT DATA', data));
-}; */

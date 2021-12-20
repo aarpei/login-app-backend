@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from 'shared/dtos/user-create.dto';
+import { GetUserDto } from 'shared/dtos/user-get.dto';
 import { UpdateUserDto } from 'shared/dtos/user-update.dto';
 import { ApiUrls, ApiUserUrls } from 'shared/enums/api-urls.enum';
 import { FindOneOptions } from 'typeorm';
@@ -36,13 +37,30 @@ export class UserController extends ControllerAbstract<UserEntity> {
   @UseGuards(AuthGuard('jwt'))
   @Get()
   public findAll(@Res() response): Promise<UserEntity[]> {
-    return this.responseBuilderService.buildPromiseResponse(
-      this.userService.findAll(),
-      response,
-      HttpStatus.OK,
-      HttpStatus.FORBIDDEN,
-      this.translationService.getDatabaseErrorGetUser(this.lang),
-    );
+    return this.userService
+      .findAll()
+      .then((users) => {
+        const usersWithoutPassword: GetUserDto[] = [];
+
+        users.forEach((user) => {
+          const userWithoutPassword: GetUserDto = {
+            id: user.id.toString(),
+            name: user.name,
+            surname: user.surname,
+            email: user.email,
+          };
+          usersWithoutPassword.push(userWithoutPassword);
+        });
+
+        return response.status(HttpStatus.OK).json(usersWithoutPassword);
+      })
+      .catch((error) => {
+        return response.status(HttpStatus.FORBIDDEN).json({
+          errorMessage: this.translationService.getDatabaseErrorGetUser(
+            this.lang,
+          ),
+        });
+      });
   }
 
   @UseGuards(AuthGuard('jwt'))

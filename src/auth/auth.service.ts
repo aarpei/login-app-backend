@@ -13,10 +13,10 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<boolean> {
+    console.log(email, password);
     const user = await this.usersService.findByPropertie(
       buildFindOneOptions(`email:${email}`),
     );
-    console.log(user);
     if (!user) {
       //TODO: IMPLEMENT ERROR
       throw new Error();
