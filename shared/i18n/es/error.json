@@ -1,0 +1,4 @@
+{
+  "error_database": "[ERROR]: error al realizar la acción ${action} para ${type}",
+  "error_database_propertie": "[ERROR]: error al realizar la acción ${action} para ${type} con ${propertie_name} ${propertie_value}"
+}
