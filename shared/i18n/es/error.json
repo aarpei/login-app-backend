@@ -1,4 +1,6 @@
 {
   "error_database": "[ERROR]: error al realizar la acción ${action} para ${type}",
-  "error_database_propertie": "[ERROR]: error al realizar la acción ${action} para ${type} con ${propertie_name} ${propertie_value}"
+  "error_database_propertie": "[ERROR]: error al realizar la acción ${action} para ${type} con ${propertie_name} ${propertie_value}",
+  "error_user_not_valid": "[ERROR]: el usuario introducido no es un usuario válido",
+  "error_generating_user_access_token": "[ERROR] no ha sido posible autenticarse en este momento, intentelo más tarde"
 }

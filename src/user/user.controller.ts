@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpStatus,
   Param,
   Post,
@@ -19,7 +20,7 @@ import { FindOneOptions } from 'typeorm';
 import { ControllerAbstract } from '../abstracts/abstract.controller';
 import { ResponseBuilderService } from '../utilities/services/response-builder.service';
 import { TranslationService } from '../utilities/services/translation.service';
-import { buildFindOneOptions } from '../utilities/Utils';
+import { buildFindOneOptions, decryptPassword } from '../utilities/Utils';
 import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 
@@ -36,7 +37,7 @@ export class UserController extends ControllerAbstract<UserEntity> {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  public findAll(@Res() response): Promise<UserEntity[]> {
+  public findAll(@Headers() headers, @Res() response): Promise<UserEntity[]> {
     return this.userService
       .findAll()
       .then((users) => {
@@ -56,8 +57,8 @@ export class UserController extends ControllerAbstract<UserEntity> {
       })
       .catch((error) => {
         return response.status(HttpStatus.FORBIDDEN).json({
-          errorMessage: this.translationService.getDatabaseErrorGetUser(
-            this.lang,
+          messsage: this.translationService.getDatabaseErrorGetUser(
+            headers['Accept-Language'],
           ),
         });
       });
@@ -66,25 +67,35 @@ export class UserController extends ControllerAbstract<UserEntity> {
   @UseGuards(AuthGuard('jwt'))
   @Get(ApiUserUrls.API_URL_USER_BY_PROPERTIE)
   public findByPropertie(
+    @Headers() headers,
     @Param('propertie') propertie: string,
     @Res() response,
   ): Promise<UserEntity> {
     const propertieObject: FindOneOptions = buildFindOneOptions(propertie);
-
-    return this.responseBuilderService.buildPromiseResponse(
-      this.userService.findByPropertie(propertieObject),
-      response,
-      HttpStatus.OK,
-      HttpStatus.FORBIDDEN,
-      this.translationService.getDatabaseErrorGetUserByPropertie(
-        this.lang,
-        Object.keys(propertieObject.where)[0],
-        Object.values<string>(propertieObject.where)[0],
-      ),
-    );
+    return this.userService
+      .findByPropertie(propertieObject)
+      .then((user) => {
+        const userWithoutPassword: GetUserDto = {
+          id: user.id.toString(),
+          name: user.name,
+          surname: user.surname,
+          email: user.email,
+        };
+        return response.status(HttpStatus.OK).json(userWithoutPassword);
+      })
+      .catch((error) => {
+        return response.status(HttpStatus.FORBIDDEN).json({
+          messsage: this.translationService.getDatabaseErrorGetUserByPropertie(
+            headers['Accept-Language'],
+            Object.keys(propertieObject.where)[0],
+            Object.values<string>(propertieObject.where)[0],
+          ),
+        });
+      });
   }
   @Post()
   public create(
+    @Headers() headers,
     @Body() body: CreateUserDto,
     @Res() response,
   ): Promise<UserEntity> {
@@ -93,13 +104,16 @@ export class UserController extends ControllerAbstract<UserEntity> {
       response,
       HttpStatus.CREATED,
       HttpStatus.FORBIDDEN,
-      this.translationService.getDatabaseErrorCreateUser(this.lang),
+      this.translationService.getDatabaseErrorCreateUser(
+        headers['Accept-Language'],
+      ),
     );
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(ApiUserUrls.API_URL_USER_BY_PROPERTIE)
   public delete(
+    @Headers() headers,
     @Param('id') userId: number,
     @Res() response,
   ): Promise<UserEntity> {
@@ -108,23 +122,32 @@ export class UserController extends ControllerAbstract<UserEntity> {
       response,
       HttpStatus.OK,
       HttpStatus.FORBIDDEN,
-      this.translationService.getDatabaseErrorDeleteUser(this.lang),
+      this.translationService.getDatabaseErrorDeleteUser(
+        headers['Accept-Language'],
+      ),
     );
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Put(ApiUserUrls.API_URL_USER_BY_PROPERTIE)
   public update(
-    @Param('id') userId: number,
+    @Headers() headers,
+    @Param('propertie') propertie: string,
     @Body() body: UpdateUserDto,
     @Res() response,
   ): Promise<UserEntity> {
+    const propertieObject: FindOneOptions = buildFindOneOptions(propertie);
+    if (body.password) {
+      body.password = decryptPassword(body?.password);
+    }
     return this.responseBuilderService.buildPromiseResponse(
-      this.userService.update(userId, body),
+      this.userService.update(propertieObject, body),
       response,
       HttpStatus.OK,
       HttpStatus.FORBIDDEN,
-      this.translationService.getDatabaseErrorUpdateUser(this.lang),
+      this.translationService.getDatabaseErrorUpdateUser(
+        headers['Accept-Language'],
+      ),
     );
   }
 }

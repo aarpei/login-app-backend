@@ -58,7 +58,7 @@ export class TranslationService {
     return this.getDatabaseError('database_update', 'type_user', lang);
   }
 
-  private translate(value: string, lang: string): string {
+  public translate(value: string, lang: string): string {
     return this.translatorService.translate(value, {
       lang: lang,
     });

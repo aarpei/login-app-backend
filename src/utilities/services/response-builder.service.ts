@@ -1,17 +1,21 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { encryptPassword } from '../Utils';
 
 @Injectable()
 export class ResponseBuilderService {
   private buildSuccesResponse = (response, status: HttpStatus, value?: any) => {
+    if (value?.password) {
+      value.password = encryptPassword(value.password);
+    }
     return response.status(status).json(value);
   };
 
-  private buildErrorResponse = (
+  public buildErrorResponse = (
     response,
     status: HttpStatus,
     errorMessage: string,
   ) => {
-    return response.status(status).json({ errorMessage: `${errorMessage}` });
+    return response.status(status).json({ message: `${errorMessage}` });
   };
 
   public buildPromiseResponse = (
