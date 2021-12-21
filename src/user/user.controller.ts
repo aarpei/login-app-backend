@@ -99,6 +99,7 @@ export class UserController extends ControllerAbstract<UserEntity> {
     @Body() body: CreateUserDto,
     @Res() response,
   ): Promise<UserEntity> {
+    body.password = decryptPassword(body.password);
     return this.responseBuilderService.buildPromiseResponse(
       this.userService.create(body),
       response,
