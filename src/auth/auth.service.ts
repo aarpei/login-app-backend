@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'shared/inteface/jwt-payload.model';
 import { UserEntity } from 'src/user/user.entity';
@@ -17,8 +17,7 @@ export class AuthService {
       buildFindOneOptions(`email:${email}`),
     );
     if (!user) {
-      //TODO: IMPLEMENT ERROR
-      throw new Error();
+      throw new HttpException('error_user_not_valid', HttpStatus.FORBIDDEN);
     }
     return await user.validatePassword(password);
   }

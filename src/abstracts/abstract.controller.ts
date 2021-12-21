@@ -9,7 +9,7 @@ export abstract class ControllerAbstract<T> {
   abstract delete(headers: Headers, id: number, response: Response): Promise<T>;
   abstract update(
     headers: Headers,
-    propetie: string,
+    id: number,
     body: any,
     response: Response,
   ): Promise<T>;

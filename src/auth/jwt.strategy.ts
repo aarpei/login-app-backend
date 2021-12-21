@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from 'shared/inteface/jwt-payload.model';
-import { HttpExceptionFilter } from 'src/filters/http-exception.filter';
 import { UserService } from 'src/user/user.service';
 import { buildFindOneOptions } from 'src/utilities/Utils';
 
@@ -21,8 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       buildFindOneOptions(`id:${payload.userId}`),
     );
     if (!user) {
-      //TODO: IMPLEMENT ERROR
-      throw new HttpExceptionFilter();
+      throw new HttpException('error_user_not_valid', HttpStatus.FORBIDDEN);
     }
     return user;
   }

@@ -6,13 +6,27 @@ import {
   Post,
   Res,
 } from '@nestjs/common';
-import { UserLoginDto } from 'shared/dtos/user-login.dto';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiForbiddenResponse,
+  ApiHeader,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AccessToken } from 'shared/dtos/auth/access-token.model';
+import { UserLoginDto } from 'shared/dtos/user/user-login.dto';
 import { ApiUrls } from 'shared/enums/api-urls.enum';
 import { ResponseBuilderService } from 'src/utilities/services/response-builder.service';
 import { TranslationService } from 'src/utilities/services/translation.service';
 import { decryptPassword } from 'src/utilities/Utils';
 import { AuthService } from './auth.service';
 
+@ApiHeader({
+  name: 'Accept-Language',
+  description: 'App language',
+})
+@ApiTags('login')
 @Controller(ApiUrls.API_URL_LOGIN)
 export class AuthController {
   constructor(
@@ -21,12 +35,23 @@ export class AuthController {
     private readonly responseBuilderService: ResponseBuilderService,
   ) {}
 
+  @ApiConsumes('application/json')
+  @ApiBody({
+    description: 'User login data',
+    type: UserLoginDto,
+  })
+  @ApiOkResponse({
+    status: 200,
+    description: 'Login successfull',
+    type: AccessToken,
+  })
+  @ApiForbiddenResponse({ status: 403, description: 'Login failed' })
   @Post()
   async login(
     @Headers() headers,
     @Body() userLogin: UserLoginDto,
     @Res() response,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<AccessToken> {
     userLogin.password = decryptPassword(userLogin.password);
     if (
       await this.authService

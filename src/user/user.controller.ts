@@ -12,9 +12,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateUserDto } from 'shared/dtos/user-create.dto';
-import { GetUserDto } from 'shared/dtos/user-get.dto';
-import { UpdateUserDto } from 'shared/dtos/user-update.dto';
+import {
+  ApiConsumes,
+  ApiForbiddenResponse,
+  ApiHeader,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { CreateUserDto } from 'shared/dtos/user/user-create.dto';
+import { GetUserDto } from 'shared/dtos/user/user-get.dto';
+import { UpdateUserDto } from 'shared/dtos/user/user-update.dto';
 import { ApiUrls, ApiUserUrls } from 'shared/enums/api-urls.enum';
 import { FindOneOptions } from 'typeorm';
 import { ControllerAbstract } from '../abstracts/abstract.controller';
@@ -24,6 +33,15 @@ import { buildFindOneOptions, decryptPassword } from '../utilities/Utils';
 import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 
+@ApiHeader({
+  name: 'Accept-Language',
+  description: 'App language',
+})
+@ApiHeader({
+  name: 'Authorization',
+  description: 'Jwt generated when user login',
+})
+@ApiTags('user')
 @Controller(ApiUrls.API_URL_USER)
 export class UserController extends ControllerAbstract<UserEntity> {
   lang = 'es';
@@ -35,6 +53,20 @@ export class UserController extends ControllerAbstract<UserEntity> {
     super();
   }
 
+  @ApiConsumes('application/json')
+  @ApiOkResponse({
+    status: 200,
+    description: 'Get all Users was successfully completed',
+    type: [UserEntity],
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Get all Users failed',
+  })
+  @ApiUnauthorizedResponse({
+    status: 401,
+    description: 'User acces token is not present or is invalid',
+  })
   @UseGuards(AuthGuard('jwt'))
   @Get()
   public findAll(@Headers() headers, @Res() response): Promise<UserEntity[]> {
@@ -64,10 +96,33 @@ export class UserController extends ControllerAbstract<UserEntity> {
       });
   }
 
+  @ApiConsumes('application/json')
+  @ApiOkResponse({
+    status: 200,
+    description: 'Get user by property was successfully completed',
+    type: UserEntity,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Get user by property failed',
+  })
+  @ApiUnauthorizedResponse({
+    status: 401,
+    description: 'User acces token is not present or is invalid',
+  })
+  @ApiParam({
+    name: 'propertie',
+    type: String,
+    example: 'email:hello@world.com',
+    required: true,
+    description:
+      "Param extracted from URL, it's used has a filter in the query to db",
+  })
   @UseGuards(AuthGuard('jwt'))
   @Get(ApiUserUrls.API_URL_USER_BY_PROPERTIE)
   public findByPropertie(
     @Headers() headers,
+
     @Param('propertie') propertie: string,
     @Res() response,
   ): Promise<UserEntity> {
@@ -93,6 +148,27 @@ export class UserController extends ControllerAbstract<UserEntity> {
         });
       });
   }
+
+  @ApiConsumes('application/json')
+  @ApiOkResponse({
+    status: 200,
+    description: 'Create user was successfully completed',
+    type: UserEntity,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Create user failed',
+  })
+  @ApiUnauthorizedResponse({
+    status: 401,
+    description: 'User acces token is not present or is invalid',
+  })
+  @ApiParam({
+    name: 'body',
+    type: CreateUserDto,
+    required: true,
+    description: 'User to save on the db',
+  })
   @Post()
   public create(
     @Headers() headers,
@@ -111,8 +187,28 @@ export class UserController extends ControllerAbstract<UserEntity> {
     );
   }
 
+  @ApiConsumes('application/json')
+  @ApiOkResponse({
+    status: 200,
+    description: 'Delete user was successfully completed',
+    type: String,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Delete user failed',
+  })
+  @ApiUnauthorizedResponse({
+    status: 401,
+    description: 'User acces token is not present or is invalid',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+    description: 'Id of the user to delete from the db',
+  })
   @UseGuards(AuthGuard('jwt'))
-  @Delete(ApiUserUrls.API_URL_USER_BY_PROPERTIE)
+  @Delete(ApiUserUrls.API_URL_USER_DELETE)
   public delete(
     @Headers() headers,
     @Param('id') userId: number,
@@ -129,15 +225,41 @@ export class UserController extends ControllerAbstract<UserEntity> {
     );
   }
 
+  @ApiConsumes('application/json')
+  @ApiOkResponse({
+    status: 200,
+    description: 'Update user was successfully completed',
+    type: UserEntity,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Update user failed',
+  })
+  @ApiUnauthorizedResponse({
+    status: 401,
+    description: 'User acces token is not present or is invalid',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+    description: 'Id of the user to update',
+  })
+  @ApiParam({
+    name: 'body',
+    type: UpdateUserDto,
+    required: true,
+    description: 'User data modified',
+  })
   @UseGuards(AuthGuard('jwt'))
-  @Put(ApiUserUrls.API_URL_USER_BY_PROPERTIE)
+  @Put(ApiUserUrls.API_URL_USER_UPDATE)
   public update(
     @Headers() headers,
-    @Param('propertie') propertie: string,
+    @Param('id') id: number,
     @Body() body: UpdateUserDto,
     @Res() response,
   ): Promise<UserEntity> {
-    const propertieObject: FindOneOptions = buildFindOneOptions(propertie);
+    const propertieObject: FindOneOptions = buildFindOneOptions(`id:${id}`);
     if (body.password) {
       body.password = decryptPassword(body?.password);
     }

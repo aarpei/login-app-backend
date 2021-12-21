@@ -6,4 +6,6 @@ export enum ApiUrls {
 
 export enum ApiUserUrls {
   API_URL_USER_BY_PROPERTIE = '/:propertie',
+  API_URL_USER_DELETE = '/:id',
+  API_URL_USER_UPDATE = '/:id',
 }
