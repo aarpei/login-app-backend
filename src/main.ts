@@ -9,7 +9,7 @@ async function bootstrap() {
   app.enableCors();
   const options = new DocumentBuilder()
     .setTitle('Login REST API')
-    .setDescription('API REST para Login APP')
+    .setDescription('API REST for Login APP')
     .setVersion('1.0')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', in: 'header' },
