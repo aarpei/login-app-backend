@@ -259,10 +259,11 @@ export class UserController extends ControllerAbstract<UserEntity> {
     @Body() body: UpdateUserDto,
     @Res() response,
   ): Promise<UserEntity> {
-    const propertieObject: FindOneOptions = buildFindOneOptions(`id:${id}`);
-    if (body.password) {
+    const propertieObject: FindOneOptions = buildFindOneOptions(`${id}`);
+    if (body?.password) {
       body.password = decryptPassword(body?.password);
     }
+    console.log('ID', id);
     return this.responseBuilderService.buildPromiseResponse(
       this.userService.update(propertieObject, body),
       response,

@@ -23,6 +23,8 @@ export class CrudService<T> implements ServiceAbstract<T> {
     propertieObject: FindOneOptions,
     updatedEntity: any,
   ): Promise<T> {
+    console.log(propertieObject);
+    console.log(updatedEntity);
     const oldData: T = (await this.repository.findOne(propertieObject)) ?? null;
     if (oldData !== null) {
       return await this.repository.save({

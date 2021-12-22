@@ -1,0 +1,6 @@
+{
+    "error_database": "[ERROR]: error executing ${action} for ${type}",
+    "error_database_propertie": "[ERROR]: error executing ${action} for ${type} with ${propertie_name} -> ${propertie_value}",
+    "error_user_not_valid": "[ERROR]: invalid user",
+    "error_generating_user_access_token": "[ERROR] user cannot be authenticated, try it later"
+}

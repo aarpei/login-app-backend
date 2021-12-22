@@ -1,0 +1,6 @@
+{
+  "database_create": "CREATE",
+  "database_delete": "DELETE",
+  "database_get": "GET",
+  "database_update": "UPDATE"
+}
