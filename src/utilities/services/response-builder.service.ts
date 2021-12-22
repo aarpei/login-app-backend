@@ -28,7 +28,6 @@ export class ResponseBuilderService {
     return promise
       .then((value) => this.buildSuccesResponse(response, succesStatus, value))
       .catch((error) => {
-        console.log(error);
         this.buildErrorResponse(response, errorStatus, errorMessage);
       });
   };

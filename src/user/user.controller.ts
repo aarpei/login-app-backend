@@ -263,7 +263,6 @@ export class UserController extends ControllerAbstract<UserEntity> {
     if (body?.password) {
       body.password = decryptPassword(body?.password);
     }
-    console.log('ID', id);
     return this.responseBuilderService.buildPromiseResponse(
       this.userService.update(propertieObject, body),
       response,
