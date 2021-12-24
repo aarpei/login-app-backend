@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { environment } from 'environment/environment';
 import { UserModule } from 'src/user/user.module';
 import { UtilitiesModule } from 'src/utilities/utilities.module';
 import { AuthController } from './auth.controller';
@@ -11,14 +12,15 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     UserModule,
     PassportModule,
-    JwtModule.register({
-      secret: 'sistemas',
-      signOptions: { expiresIn: '3600s' },
-    }),
+    JwtModule.register({ ...environment.jwtConfig }),
     UtilitiesModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule {
+  constructor() {
+    console.log(process);
+  }
+}
